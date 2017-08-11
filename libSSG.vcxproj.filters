@@ -10,6 +10,12 @@
     <Filter Include="src">
       <UniqueIdentifier>{3db1036a-c537-42ce-be98-f7e49afed156}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\graphics">
+      <UniqueIdentifier>{f3d77e9d-9956-49ce-8f00-722c838d1d91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\core">
+      <UniqueIdentifier>{6ff646c8-70eb-4b54-a5ef-c92627049fe2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ssg.h">
@@ -17,6 +23,12 @@
     </ClInclude>
     <ClInclude Include="include\ssg_dbg.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\core\ssg_color4.h">
+      <Filter>include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\core\ssg_core.h">
+      <Filter>include\core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
