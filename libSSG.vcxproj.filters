@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{40710ae3-db47-45d6-ab85-d0dadb70afb0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{3db1036a-c537-42ce-be98-f7e49afed156}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\ssg.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ssg_dbg.h">
+      <Filter>include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\ssg.cc">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ssg_main.cc">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="include\ssg_timer.h">
+      <Filter>include</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ssg_timer.cc">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ssg_dbg.cc">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
