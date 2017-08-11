@@ -1,10 +1,14 @@
 #include <cstdio>
+#define _CRTDBG_MAP_ALLOC
+#include <cstdlib>
+#include <crtdbg.h>
 
 #include <Windows.h>
 #include <d3d11.h>
 #include <DXGI.h>
 #include <DXGIType.h>
-#include <dxgi1_2.h>
+#include <dxgi1_3.h>
+#include <d2d1_3.h>
 
 #include "ssg.h"
 #include "core\\ssg_color4.h"
@@ -19,9 +23,9 @@ ID3D11Device* g_pd3dDevice = nullptr;
 ID3D11DeviceContext* g_pImmediateContext = nullptr;
 IDXGISwapChain1* g_pSwapChain = nullptr;
 ID3D11RenderTargetView* g_pRenderTargetView = nullptr;
-IDXGIDevice2* pDXGIDevice;
-IDXGIAdapter * pDXGIAdapter;
-IDXGIFactory2 * pIDXGIFactory;
+IDXGIDevice2* g_pDXGIDevice = nullptr;
+IDXGIAdapter * g_pDXGIAdapter = nullptr;
+IDXGIFactory2 * g_pIDXGIFactory = nullptr;
 
 HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
 HRESULT InitDevice();
@@ -37,41 +41,47 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	if (FAILED(InitWindow(hInstance, nCmdShow))) {
-		return 0;
-	}
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-	if (FAILED(InitDevice())) {
+	{
+		if (FAILED(InitWindow(hInstance, nCmdShow))) {
+			return 0;
+		}
+
+		if (FAILED(InitDevice())) {
+			CleanupDevice();
+			return 0;
+		}
+
+		app_init();
+
+		ssg_timer oneFrameTimer;
+		oneFrameTimer.start();
+
+		MSG msg = { 0 };
+
+		while (WM_QUIT != msg.message) {
+			if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+			}
+			else {
+				float deltaTime = oneFrameTimer.elapsedTime();
+				oneFrameTimer.reset();
+
+				app_update(deltaTime);
+				app_render();
+
+				Render();
+			}
+		}
+
+		app_destroy();
+
 		CleanupDevice();
-		return 0;
 	}
 
-	app_init();
-
-	ssg_timer oneFrameTimer;
-	oneFrameTimer.start();
-
-	MSG msg = { 0 };
-
-	while (WM_QUIT != msg.message) {
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-		else {
-			float deltaTime = oneFrameTimer.elapsedTime();
-			oneFrameTimer.reset();
-
-			app_update(deltaTime);
-			app_render();
-
-			Render();
-		}
-	}
-
-	app_destroy();
-
-	CleanupDevice();
+	_CrtDumpMemoryLeaks();
 
 	return 0;
 }
@@ -195,15 +205,15 @@ HRESULT InitDevice()
 	if (FAILED(hr))
 		return hr;
 
-	hr = g_pd3dDevice->QueryInterface(__uuidof(IDXGIDevice2), (void**)&pDXGIDevice);
+	hr = g_pd3dDevice->QueryInterface(__uuidof(IDXGIDevice2), (void**)&g_pDXGIDevice);
 	if (FAILED(hr))
 		return hr;
 
-	hr = pDXGIDevice->GetParent(__uuidof(IDXGIAdapter), (void **)&pDXGIAdapter);
+	hr = g_pDXGIDevice->GetParent(__uuidof(IDXGIAdapter), (void **)&g_pDXGIAdapter);
 	if (FAILED(hr))
 		return hr;
 
-	hr = pDXGIAdapter->GetParent(__uuidof(IDXGIFactory2), (void **)&pIDXGIFactory);
+	hr = g_pDXGIAdapter->GetParent(__uuidof(IDXGIFactory2), (void **)&g_pIDXGIFactory);
 	if (FAILED(hr))
 		return hr;
 
@@ -213,7 +223,7 @@ HRESULT InitDevice()
 	fullscreenDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 	fullscreenDesc.Windowed = TRUE;
 
-	hr = pIDXGIFactory->CreateSwapChainForHwnd(g_pd3dDevice, g_hWnd,
+	hr = g_pIDXGIFactory->CreateSwapChainForHwnd(g_pd3dDevice, g_hWnd,
 		&sd, &fullscreenDesc, nullptr, &g_pSwapChain);
 	if (FAILED(hr))
 		return hr;
@@ -260,4 +270,7 @@ void CleanupDevice()
 	if (g_pSwapChain) g_pSwapChain->Release();
 	if (g_pImmediateContext) g_pImmediateContext->Release();
 	if (g_pd3dDevice) g_pd3dDevice->Release();
+	if (g_pDXGIDevice) g_pDXGIDevice->Release();
+	if (g_pDXGIAdapter) g_pDXGIAdapter->Release();
+	if (g_pIDXGIFactory) g_pIDXGIFactory->Release();
 }
